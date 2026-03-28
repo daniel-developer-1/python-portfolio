@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException, status
 from typing import List
-from database import get_db, engine
+from database import get_db, engine, Base
 from sqlalchemy.orm import Session
 import models
 import schemas
