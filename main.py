@@ -27,11 +27,7 @@ app = FastAPI(
     openapi_tags=model_tags
 )
 
-# --- CONFIGURACIÓN DE PAGOS x402 ---
-MI_DIRECCION = "0x29c1…a37b"  # Reemplaza con tu dirección completa
-
-# Configurar la dirección de pago como variable de entorno
-os.environ["X402_PAY_TO"] = MI_DIRECCION
+init_x402(app, network="base")
 
 # Inicializar x402 (sin pay_to_address)
 init_x402(app, network="base")
