@@ -29,6 +29,11 @@ def get_root():
     return {"Message": "Welcome to my API"}
 
 
+@app.get("/saludo")
+def saludo(nombre: str = "Amigo"):
+    return {"mensaje": f"Hola {nombre}, bienvenido a mi API"}
+
+
 @app.get("/users", response_model=List[schemas.UserResponse], tags=["get"])
 def get_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     users = crud.get_users(db, skip, limit)
