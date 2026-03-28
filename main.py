@@ -23,6 +23,15 @@ app = FastAPI(
     openapi_tags=model_tags
 )
 
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}
+
+# Esto permite que HEAD también funcione
+@app.head("/health")
+def health_check_head():
+    return {}
+
 
 @app.get("/", tags=["root"])
 def get_root():
