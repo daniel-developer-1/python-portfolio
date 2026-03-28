@@ -1,15 +1,17 @@
+import os
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi_x402 import init_x402, pay
 from typing import List
-import os
 from database import get_db, engine, Base
 from sqlalchemy.orm import Session
 import models
 import schemas
 import crud
 
+# Crear tablas
 models.Base.metadata.create_all(bind=engine)
 
+# Tags para documentación
 model_tags = [
     {"name": "root"},
     {"name": "get"},
@@ -25,8 +27,15 @@ app = FastAPI(
     openapi_tags=model_tags
 )
 
-MI_DIRECCION = "0x29c1…a37b"
-init_x402(app, network="base", pay_to_address=MI_DIRECCION)
+# --- CONFIGURACIÓN DE PAGOS x402 ---
+MI_DIRECCION = "0x29c1…a37b"  # Reemplaza con tu dirección completa
+
+# Configurar la dirección de pago como variable de entorno
+os.environ["X402_PAY_TO"] = MI_DIRECCION
+
+# Inicializar x402 (sin pay_to_address)
+init_x402(app, network="base")
+# --- FIN CONFIGURACIÓN DE PAGOS ---
 
 @app.get("/datos-premium")
 @pay("$0.01")  # Cobra 1 centavo por consulta
@@ -57,23 +66,19 @@ def health_check():
 def health_check_head():
     return {}
 
-
 @app.get("/", tags=["root"])
 def get_root():
     return {"Message": "Welcome to my API"}
-
 
 @app.get("/users", response_model=List[schemas.UserResponse], tags=["get"])
 def get_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     users = crud.get_users(db, skip, limit)
     return users
 
-
 @app.get("/user/id/{user_id}", response_model=schemas.UserResponse, tags=["get"])
 def get_user_by_id(user_id: int, db: Session = Depends(get_db)):
     user = crud.get_user_by_id(db, user_id)
     return user
-
 
 @app.get("/user/email/{user_email}", response_model=schemas.UserResponse, tags=["get"])
 def get_user_by_email(user_email: str, db: Session = Depends(get_db)):
@@ -85,18 +90,15 @@ def get_user_by_email(user_email: str, db: Session = Depends(get_db)):
         )
     return user
 
-
 @app.post("/user/create", response_model=schemas.UserResponse, tags=["post"])
 def create_user(new_user: schemas.UserCreate, db: Session = Depends(get_db)):
     user = crud.user_create(db, new_user)
     return user
 
-
 @app.put("/user/update/{user_id}", response_model=schemas.UserResponse, tags=["put"])
 def update_user(user_id: int, user_update_data: schemas.UserUpdate, db: Session = Depends(get_db)):
     user_updated = crud.user_update(db, user_id, user_update_data)
     return user_updated
-
 
 @app.delete("/user/delete/{user_id}", tags=["delete"])
 def delete_user(user_id: int, db: Session = Depends(get_db)):
