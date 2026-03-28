@@ -1,5 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi_x402 import init_x402, pay
 from typing import List
+import os
 from database import get_db, engine, Base
 from sqlalchemy.orm import Session
 import models
@@ -22,6 +24,29 @@ app = FastAPI(
     version="1.4.0",
     openapi_tags=model_tags
 )
+
+MI_DIRECCION = "0x29c1…a37b"
+init_x402(app, network="base", pay_to_address=MI_DIRECCION)
+
+@app.get("/datos-premium")
+@pay("$0.01")  # Cobra 1 centavo por consulta
+def premium_data():
+    """Este endpoint requiere pago"""
+    return {
+        "data": "¡Información premium! Has pagado $0.01 por acceder.",
+        "timestamp": "2026-03-28",
+        "calidad": "exclusiva"
+    }
+
+@app.get("/datos-pro")
+@pay("$0.05")  # Cobra 5 centavos por consulta
+def pro_data():
+    """Endpoint más caro para datos avanzados"""
+    return {
+        "data": "¡Datos PRO! Mayor valor por $0.05.",
+        "analisis": "profundo",
+        "recomendaciones": ["opcion1", "opcion2"]
+    }
 
 @app.get("/health")
 def health_check():
